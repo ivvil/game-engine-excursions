@@ -1,0 +1,9 @@
+#+author: Iván Villagrasa
+#+email: ivvil412@gmail.com
+#+title: A simple canvas 3d rendering engine
+
+* Abstract
+
+A simple implementation of a 3d rendering engine using the HTML canvas 2d API follows [[https://www.youtube.com/watch?v=BFZKSV2zieM&list=PLUvk3cvE4qoYjYuQdCIdnxRUThX63PFhk&pp=iAQB][this tutorial by Not the Future]].
+
+The goal of this project is to explain the concepts behind 3d rendering in a simple way, using code examples. This project aims to create a 3d rendering engine (with basic game engine functionality) using the 2d canvas API, an API centered in simple 2d rendering which we are gonna hijack to render in 3d, allowing us to abstract most of the complex code needed just to render something to a screen.
