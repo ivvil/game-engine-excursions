@@ -1,9 +1,34 @@
 #+author: Iván Villagrasa
 #+email: ivvil412@gmail.com
 #+title: A simple canvas 3d rendering engine
+#+noweb: yes
 
 * Abstract
 
 A simple implementation of a 3d rendering engine using the HTML canvas 2d API follows [[https://www.youtube.com/watch?v=BFZKSV2zieM&list=PLUvk3cvE4qoYjYuQdCIdnxRUThX63PFhk&pp=iAQB][this tutorial by Not the Future]].
 
 The goal of this project is to explain the concepts behind 3d rendering in a simple way, using code examples. This project aims to create a 3d rendering engine (with basic game engine functionality) using the 2d canvas API, an API centered in simple 2d rendering which we are gonna hijack to render in 3d, allowing us to abstract most of the complex code needed just to render something to a screen.
+
+Thanks to the format of this file (org mode) we are able to mix the source code of this project with a rich markup language, exportable to a wide variety of other formats for display. Also thanks to tangle an the noweb syntax, we are able to write the code in the order we want, organizing it in a final code block which will be tangled into the final source code.
+
+* Initializing the environment
+
+Here we setup a simple HTML page with a canvas, where we will draw. The ~JS~ "tag" inside the ~script~ section is where the JavaScript code will be placed later.
+
+#+NAME: html_env
+#+begin_src html :tangle yes
+  <!DOCTYPE html>
+  <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+	  <meta charset="UTF-8">
+	  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	  <title>3D Engine</title>
+	</head>
+	<body>
+	  <script>
+		<<JS>>
+	  </script>
+	  <canvas id="canvas" width="800" height="600" />
+	</body>
+  </html>
+#+end_src
