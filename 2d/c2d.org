@@ -11,12 +11,16 @@ The goal of this project is to explain the concepts behind 3d rendering in a sim
 
 Thanks to the format of this file (org mode) we are able to mix the source code of this project with a rich markup language, exportable to a wide variety of other formats for display. Also thanks to tangle an the noweb syntax, we are able to write the code in the order we want, organizing it in a final code block which will be tangled into the final source code.
 
+** Why?
+
+This is a great exercise to help us figure out how rendering actually works, this insight into the internals of rendering can help us in a lot of ways when using or designing 3d software.
+
 * Initializing the environment
 
-Here we setup a simple HTML page with a canvas, where we will draw. The ~JS~ "tag" inside the ~script~ section is where the JavaScript code will be placed later.
+Here we setup a simple HTML page with a canvas, where we will draw. The ~script~ "tag" inside the ~body~ section is where the JavaScript code will be placed later.
 
-#+NAME: html_env
-#+begin_src html :tangle yes
+#+NAME: html-env
+#+begin_src html :tangle yes :noweb yes
   <!DOCTYPE html>
   <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 	<head>
@@ -24,11 +28,150 @@ Here we setup a simple HTML page with a canvas, where we will draw. The ~JS~ "ta
 	  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	  <title>3D Engine</title>
 	</head>
-	<body>
-	  <script>
-		<<JS>>
-	  </script>
+	<body onload="start()">
+	  <<script>>	  
 	  <canvas id="canvas" width="800" height="600" />
 	</body>
   </html>
 #+end_src
+
+The most important declaration inside this code block is the canvas tag: ~<canvas id="canvas" width="800" height="600" />~
+
+We create a new canvas with id (name) =canvas= with a size of 800 by 600 pixels.
+
+* Engine
+
+** Getting the context
+
+Here we get the canvas element into JavaScript by selecting it by it's element name: =canvas=, then we get the context we will use to draw to it, selecting the 2d API.
+
+#+NAME: context
+#+begin_src javascript :tangle yes
+
+  function start() {
+	  const canvas = document.getElementById("canvas");
+	  const ctx = canvas.getContext("2d");
+  }
+#+end_src
+
+** Some simple keyboard input code
+
+To move our player we will need a way to get the current keys pressed in the keyboard.
+Here we declare a variable ~directions~ to store the current keyboard status, witch we update with the ~handleKeyEvt~ function
+
+#+NAME: input
+#+begin_src javascript
+  let directions = {
+	'w': false,
+	's': false,
+	'a': false,
+	'd': false
+  };
+
+  function handleKeyEvt(evt) {
+	const key = evt.key.toLowerCase();
+
+	if (key in directions) {
+	  directions[key] = evt.type == 'keydown'; // Sets the direction depending if it was a keydown or keyup event
+	  evt.preventDefault();		// Prevents the default functions of the keys
+	}
+  }
+
+  document.addEventListener('keydown', handleKeyEvt);
+  document.addEventListener('keyup', handleKeyEvt);
+#+end_src
+
+** Rendering context
+
+We'll use an object to store all information needed for rendering.
+
+#+NAME: rendering-ctx
+#+begin_src javascript
+  class RenderingCtx {
+	constructor(canvasCtx) {
+	  this.canvasCtx = canvasCtx;
+	  this.controllerCtx = new ControllerCtx(0, 0);
+	}
+  }
+#+end_src
+
+*** Player/Camera context
+
+
+
+
+** Creating our own data-types
+
+For simplifying the passing of data to functions we will create objects to hold the data.
+
+*** Point 3d
+
+#+NAME: p3d
+#+begin_src javascript
+  class Point3D {
+	constructor(x, y, z) {
+	  this.x = x;
+	  this.y = y;
+	  this.z = z;
+	}
+  }
+#+end_src
+
+*** Point 2d
+
+#+NAME: p2d
+#+begin_src javascript
+class Point2d {
+	constructor(x, y) {
+		this.x = x;
+		this.y = y;
+	}
+	*[Symbol.iterator]() {
+		yield this.x;
+		yield this.y;
+	}
+}
+#+end_src
+
+** Drawing polygons
+
+This is one of the most important steps in getting our renderer up and running, as the polygon is the base of any 3d engine. Our goal for this section is to be able to render a triangle to the screen.
+
+*** Drawing quads
+
+Rendering a triangle to the screen just means drawing three lines, so we will start there.
+
+#+NAME: draw-quad
+#+begin_src javascript
+  function drawQuad(p1, p2, p3, p4) {
+	ctx.beginPath();
+	[p1, p2, p3, p4].forEach((point, i) => {
+	  if (i == 0) {
+		ctx.moveTo(...point);
+	  } else {
+		ctx.lineTo(...point);
+	  }
+	});
+	ctx.closePath();
+	ctx.fill();
+  }
+
+  function draw3dQuad(rCtx, p1, p2, p3, p4) {
+  
+  }
+#+end_src
+
+
+** Formatting everything
+
+#+NAME: script
+#+begin_src html :noweb yes
+  <script>
+	<<context>>
+	<<input>>
+	<<p2d>>
+	<<draw-quad>>
+  </script>
+#+end_src
+
+
