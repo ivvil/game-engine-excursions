@@ -1,7 +1,6 @@
 #+author: Iván Villagrasa
 #+email: ivvil412@gmail.com
 #+title: A simple canvas 3d rendering engine
-#+noweb: yes
 
 * Abstract
 
@@ -46,7 +45,7 @@ We create a new canvas with id (name) =canvas= with a size of 800 by 600 pixels.
 Here we get the canvas element into JavaScript by selecting it by it's element name: =canvas=, then we get the context we will use to draw to it, selecting the 2d API.
 
 #+NAME: context
-#+begin_src javascript :tangle yes
+#+begin_src javascript
 
   function start() {
 	  const canvas = document.getElementById("canvas");
@@ -88,17 +87,27 @@ We'll use an object to store all information needed for rendering.
 #+NAME: rendering-ctx
 #+begin_src javascript
   class RenderingCtx {
-	constructor(canvasCtx) {
-	  this.canvasCtx = canvasCtx;
-	  this.controllerCtx = new ControllerCtx(0, 0);
+	constructor(canvas) {
+	  this.canvas = canvas
+	  this.canvasCtx = canvas.getContext("2d");
+	  this.controllerCtx = new ControllerCtx(new Point3D());
 	}
   }
 #+end_src
 
 *** Player/Camera context
 
+#+begin_src javascript
+  class ControllerCtx {
+	constructor(pos, rot = new Quaternion()) {
+	  this.pos = pos;
+	  this.rot = rot;
+	  this.fov = 90;
+	}
 
+  }
 
+#+end_src
 
 ** Creating our own data-types
 
@@ -109,10 +118,27 @@ For simplifying the passing of data to functions we will create objects to hold 
 #+NAME: p3d
 #+begin_src javascript
   class Point3D {
-	constructor(x, y, z) {
+	constructor(x = 0, y = 0, z = 0) {
 	  this.x = x;
 	  this.y = y;
 	  this.z = z;
+	}
+
+	add(p) {
+	  return new Point3D(this.x + p.x, this.y + p.y, this.z + p.z);
+	}
+
+	rotate(q) {
+	  const p = new Quaternion(0, this.x, this.y, this.z);
+	  const qConjugate = new Quaternion(q.w, -q.x, -q.y, -q.z);
+	  const rotatedP = q.multiply(p).multiply(qConjugate);
+	  return new Point3D(rotatedP.x, rotatedP.y, rotatedP.z);
+	}
+
+	,*[Symbol.iterator]() {
+	  yield this.x;
+	  yield this.y;
+	  yield this.z;
 	}
   }
 #+end_src
@@ -121,17 +147,46 @@ For simplifying the passing of data to functions we will create objects to hold 
 
 #+NAME: p2d
 #+begin_src javascript
-class Point2d {
+  class Point2D {
 	constructor(x, y) {
-		this.x = x;
-		this.y = y;
+	  this.x = x;
+	  this.y = y;
 	}
+  
 	*[Symbol.iterator]() {
-		yield this.x;
-		yield this.y;
+	  yield this.x;
+	  yield this.y;
 	}
-}
+  }
 #+end_src
+
+*** Quaternion
+
+#+begin_src javascript
+  class Quaternion {
+	constructor(w = 0, x = 0, y = 0, z = 0) {
+	  this.w = w;
+	  this.x = x;
+	  this.y = y;
+	  this.z = z;
+	}
+
+	multiply(q) {
+	  const w = this.w * q.w - this.x * q.x - this.y * q.y - this.z * q.z;
+	  const x = this.w * q.x + this.x * q.w + this.y * q.z - this.z * q.y;
+	  const y = this.w * q.y - this.x * q.z + this.y * q.w + this.z * q.x;
+	  const z = this.w * q.z + this.x * q.y - this.y * q.x + this.z * q.w;
+	  return new Quaternion(w, x, y, z);
+	}
+
+	normalize() {
+	  const mag = Math.sqrt(this.w * this.w + this.x * this.x + this.y * this.y + this.z * this.z);
+	  return new Quaternion(this.w / mag, this.x / mag, this.y / mag, this.z / mag);
+	}
+  }
+
+#+end_src
+
 
 ** Drawing polygons
 
